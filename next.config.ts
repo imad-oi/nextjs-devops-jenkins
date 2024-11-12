@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'export',  // Enable static exports
   images: {
-    unoptimized: true, // Required for static export with images
+    unoptimized: true, // Required for static export
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,20 +13,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Configure redirects if needed
-  async redirects() {
-    return [];
-  },
-  // Configure rewrites if needed
-  async rewrites() {
-    return [];
-  },
-  // Enable React strict mode for better development
+  // Remove redirects and rewrites for static export
   reactStrictMode: true,
-  // Disable server-side features for static export
-  // Configure domain for static export
   basePath: '',
-  // Configure trailing slash behavior
   trailingSlash: false,
 };
 

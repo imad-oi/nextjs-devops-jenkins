@@ -1,8 +1,11 @@
+import { Notification } from "@/types/Notification";
+import { Task } from "@/types/Task";
+
 const STORAGE_KEY = 'task-management-app';
 
 interface StorageData {
-  tasks: any[];
-  notifications: any[];
+  tasks: Task[];
+  notifications: Notification[];
 }
 
 export const loadFromStorage = (): StorageData => {
