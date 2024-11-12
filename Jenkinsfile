@@ -20,8 +20,16 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci || npm install'
-                sh 'npm install netlify-cli -g'
+                sh '''
+                    npm ci || npm install
+                    npm install netlify-cli -g
+                '''
+            }
+        }
+
+        stage('Type Check') {
+            steps {
+                sh 'npx tsc --noEmit'
             }
         }
 
@@ -33,11 +41,15 @@ pipeline {
 
         stage('Build') {
             environment {
-                // Add any necessary environment variables for production build
                 NODE_ENV = 'production'
+                NEXT_PUBLIC_API_URL = 'your-api-url-here' // Add if needed
             }
             steps {
-                sh 'npm run build'
+                sh '''
+                    npm run build
+                    echo "Build completed, checking output directory"
+                    ls -la out/
+                '''
             }
         }
 
@@ -49,9 +61,15 @@ pipeline {
 
         stage('Deploy to Netlify') {
             steps {
-                sh """
-                    npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir out
-                """
+                sh '''
+                    if [ -d "out" ]; then
+                        echo "Deploying to Netlify..."
+                        npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir out
+                    else
+                        echo "Error: 'out' directory not found"
+                        exit 1
+                    fi
+                '''
             }
         }
     }
