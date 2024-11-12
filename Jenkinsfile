@@ -55,7 +55,12 @@ pipeline {
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=nextjs-task-manager \
+                            -Dsonar.projectName='NextJS Task Manager' \
+                            -Dsonar.projectVersion=1.0 \
                             -Dsonar.sources=. \
+                            -Dsonar.sourceEncoding=UTF-8 \
+                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                            -Dsonar.exclusions=**/*.test.tsx,**/*.test.ts,**/*.spec.tsx,**/*.spec.ts,**/node_modules/**,**/coverage/** \
                             -Dsonar.host.url=http://localhost:9000 \
                             -Dsonar.login=$SONAR_TOKEN
                         """
