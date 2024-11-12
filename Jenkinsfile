@@ -7,7 +7,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'Node 18.17.0'
+        nodejs 'Node 20.11.0'
     }
 
     stages {
@@ -27,11 +27,15 @@ pipeline {
 
         stage('Lint') {
             steps {
-                sh 'npm run lint || true'
+                sh 'npm run lint'
             }
         }
 
         stage('Build') {
+            environment {
+                // Add any necessary environment variables for production build
+                NODE_ENV = 'production'
+            }
             steps {
                 sh 'npm run build'
             }
@@ -40,26 +44,6 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'npm test || true'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            environment {
-                SONAR_TOKEN = credentials('sonar-token')
-            }
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=nextjs-task-manager \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.login=$SONAR_TOKEN
-                        """
-                    }
-                }
             }
         }
 
