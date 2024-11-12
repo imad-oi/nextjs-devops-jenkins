@@ -4,24 +4,23 @@ pipeline {
     environment {
         NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
         NETLIFY_SITE_ID = credentials('netlify-site-id')
-        NODE_VERSION = '18.17.0'
+    }
+
+    tools {
+        nodejs 'Node 18.17.0'
     }
 
     stages {
         stage('Setup Node.js') {
             steps {
-                script {
-                    // Use nvm or nodejs plugin to install Node.js
-                    nodejs(nodeJSInstallationName: 'Node 18.17.0') {
-                        sh 'node --version'
-                    }
-                }
+                sh 'node --version'
+                sh 'npm --version'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'npm ci || npm install'
                 sh 'npm install netlify-cli -g'
             }
         }
@@ -55,12 +54,7 @@ pipeline {
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=nextjs-task-manager \
-                            -Dsonar.projectName='NextJS Task Manager' \
-                            -Dsonar.projectVersion=1.0 \
                             -Dsonar.sources=. \
-                            -Dsonar.sourceEncoding=UTF-8 \
-                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                            -Dsonar.exclusions=**/*.test.tsx,**/*.test.ts,**/*.spec.tsx,**/*.spec.ts,**/node_modules/**,**/coverage/** \
                             -Dsonar.host.url=http://localhost:9000 \
                             -Dsonar.login=$SONAR_TOKEN
                         """
@@ -71,19 +65,15 @@ pipeline {
 
         stage('Deploy to Netlify') {
             steps {
-                script {
-                    // Deploy to Netlify
-                    sh """
-                        netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir out
-                    """
-                }
+                sh """
+                    npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir out
+                """
             }
         }
     }
 
     post {
         always {
-            // Clean workspace after build
             cleanWs()
         }
         success {
